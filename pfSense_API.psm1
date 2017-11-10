@@ -1,4 +1,3 @@
-#requires -Version 3.0
 <#
         .Synopsis
         pfSense management functions built for pfSense version 2.x
@@ -19,30 +18,10 @@
 #region Prerequisites
 
 # All modules require the core
-If (!(Get-Module -Name core))
-{
-    Try
-    {
-        Import-Module -Name 'core' -ErrorAction Stop
-    }
 
-    Catch
-    {
-        Try
-        {
-            $uriCoreModule = 'https://raw.githubusercontent.com/masters274/Posh_Repo/master/Modules/Core/core.psm1'
-    
-            $moduleCode = (Invoke-WebRequest -Uri $uriCoreModule -UseBasicParsing).Content
-            
-            Invoke-Expression -Command $moduleCode
-        }
-    
-        Catch
-        {
-            Write-Error -Message ('Failed to load {0}, due to missing core module' -f $PSScriptRoot)
-        }
-    }
-}
+<#
+    Great news! The core module is now installed automatically when installed from PSGallery
+#>
 
 #endregion
 
@@ -85,8 +64,13 @@ Function Connect-pfSense
     {
         # Debugging for scripts
         $Script:boolDebug = $PSBoundParameters.Debug.IsPresent
+        
+        # Is -Force set?
+        # TODO: use to avoid asking if we should ignore self-signed web certs
+        $Script:boolForce = $PSBoundParameters.Force.IsPresent
 
         # pfSense requires TLS1.2 This is not an available security protocol in Invoke-WebRequest by default
+        # TODO: use available function  (Set-WebSecurityProtocol)
         If ([Net.ServicePointManager]::SecurityProtocol -notmatch 'TLS12' -and -not $NoTLS)
         {
             [Net.ServicePointManager]::SecurityProtocol += [Net.SecurityProtocolType]::TLS12
@@ -102,6 +86,11 @@ Function Connect-pfSense
                 ...Just a suggestion
         #>
         
+        # TODO: use available function  (Set-WebCertificatePolicy)
+        # Warn the user user that security will be degraded, and ask if they would like to proceed. 
+        # Check if they have the proper version of core use the function to Set-WebCertificatePolicy
+            # Require that core be updated
+        # Add a note on how to revert the security policy back to the original, without restarting PowerShell
         If ($IgnoreCertificateErrors)
         {
             Try
@@ -699,24 +688,24 @@ Function Export-pfSenseUserCert
 
             ## Go through all of the rows in the table
 
-            foreach($row in $rows)
+            Foreach ($row in $rows)
             {
                 $cells = @($row.Cells)
 
                 ## If we've found a table header, remember its titles
 
-                if($cells[0].tagName -eq "TH")
+                If ($cells[0].tagName -eq "TH")
                 {
-                    $titles = @($cells | % { ("" + $_.InnerText).Trim() })
+                    $titles = @($cells | ForEach-Object { ("" + $_.InnerText).Trim() })
 
                     continue
                 }
 
                 ## If we haven't found any table headers, make up names "P1", "P2", etc.
 
-                if(-not $titles)
+                If (-not $titles)
                 {
-                    $titles = @(1..($cells.Count + 2) | % { "P$_" })
+                    $titles = @(1..($cells.Count + 2) | ForEach-Object { "P$_" })
                 }
 
                 ## Now go through the cells in the the row. For each, try to find the
@@ -727,16 +716,14 @@ Function Export-pfSenseUserCert
 
                 $resultObject = [Ordered] @{}
 
-                for($counter = 0; $counter -lt $cells.Count; $counter++)
+                For ($intCounter = 0; $intCounter -lt $cells.Count; $intCounter++)
                 {
 
-                    $title = $titles[$counter]
+                    $title = $titles[$intCounter]
 
-                    if(-not $title) { continue }
+                    If (-not $title) { continue }
 
-
-
-                    $resultObject[$title] = ("" + $cells[$counter].InnerText).Trim()
+                    $resultObject[$title] = ("" + $cells[$intCounter].InnerText).Trim()
 
                 }
 
