@@ -1423,6 +1423,88 @@ Function Get-pfSenseCrl
 
 Function Add-pfSenseFirewallRule
 {
+    [CmdLetBinding()]
+     Param
+    (
+        [Parameter(Mandatory=$true, Position=0,
+                HelpMessage='Valid/active websession to server'
+        )] [PSObject] $Session,
+
+        [Parameter(Mandatory=$true, Position=1,
+                HelpMessage='Rule action'
+        )] [String] $Action,
+
+        [Parameter(Mandatory=$true, Position=2,
+                HelpMessage='Rule interface'
+        )] [String] $Interface,
+
+        [Parameter(Mandatory=$true, Position=3,
+            HelpMessage='Rule address family'
+        )]
+        [ValidateSet('IPv4','IPv6','IPv4IPv6')]
+        [String] $AddressFamily,
+
+        [Parameter(Mandatory=$true, Position=4,
+                HelpMessage='Rule source'
+        )] [String] $Source,
+
+        [Parameter(Mandatory=$true, Position=5,
+                HelpMessage='Rule source net mask'
+        )] [int] $SourceMask,
+
+        [Parameter(Mandatory=$true, Position=6,
+                HelpMessage='Rule source'
+        )] [String] $Source,
+
+        [Parameter(Mandatory=$true, Position=7,
+                HelpMessage='Rule source net mask'
+        )] [Int] $SourceMask,
+
+        [Parameter(Mandatory=$false,
+                HelpMessage='Rule source port from'
+        )] [String] $SourcePortFrom  = "Any",
+
+        [Parameter(Mandatory=$false,
+                HelpMessage='Rule source port to'
+        )] [String] $SourcePortTo = "Any",
+
+        [Parameter(Mandatory=$true, Position=8,
+                HelpMessage='Rule destination'
+        )] [String] $Destination,
+
+        [Parameter(Mandatory=$true, Position=9,
+                HelpMessage='Rule destination net mask'
+        )] [Int] $DestinationMask,
+
+        [Parameter(Mandatory=$false,
+                HelpMessage='Rule destination port from'
+        )] [String] $DestinationPortFrom  = "Any",
+
+        [Parameter(Mandatory=$false,
+                HelpMessage='Rule destination port to'
+        )] [String] $DestinationPortTo = "Any",
+
+        [Parameter(Mandatory=$true, Position=4,
+            HelpMessage='Rule protocol'
+        )]
+        [ValidateSet('Any','TCP','UDP','TCPUDP','ICMP','ESP','AH','GRE','IPV6','IGMP','PIM','OSPF','SCTP','CARP','PFSYNC')]
+        [String] $Protocol,
+
+        [Parameter(Mandatory=$false, HelpMessage='Add rule with disabled state')]
+        [Switch] $Disabled,
+
+        [Parameter(Mandatory=$false, HelpMessage='Add rule with source match inverted')]
+        [Switch] $InvertSource,
+
+        [Parameter(Mandatory=$false, HelpMessage='Add rule with destination match inverted')]
+        [Switch] $InvertDestination,
+
+        [Parameter(Mandatory=$false, HelpMessage='Log packets that are handled by this rule')]
+        [Switch] $Log,
+
+        [Parameter(Mandatory=$false, HelpMessage='Rule description for administrative reference')]
+        [String] $Description,
+    )
 
 }
 
